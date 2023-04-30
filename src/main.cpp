@@ -23,22 +23,24 @@ void setup() {
 }
 
 void loop() {
-  if (WiFi.isConnected() && !sensorId) {
-    http.begin(serverUrl);
-    if (http.GET() == 200) {
-      deserializeJson(dataJSON, http.getString());
-      sensorId = dataJSON["id"];
-      dataJSON.clear();
+  if (WiFi.isConnected()) {
+    if (!sensorId) {
+      http.begin(serverUrl);
+      if (http.GET() == 200) {
+        deserializeJson(dataJSON, http.getString());
+        sensorId = dataJSON["id"];
+        dataJSON.clear();
+      }
     }
+    
+    http.begin(serverUrl);
+    sensorMoinsture = map(analogRead(moinstureSensor), 1000, 3000, 100, 0);
+    dataJSON["id"] = sensorId;
+    dataJSON["moinsture"] = sensorMoinsture;
+    serializeJson(dataJSON, sensor);
+    dataJSON.clear();
+    http.POST(sensor);
+    sensor.clear();
+    delay(900000);
   }
-  
-  http.begin(serverUrl);
-  sensorMoinsture = map(analogRead(moinstureSensor), 1000, 3000, 100, 0);
-  dataJSON["id"] = sensorId;
-  dataJSON["moinsture"] = sensorMoinsture;
-  serializeJson(dataJSON, sensor);
-  dataJSON.clear();
-  http.POST(sensor);
-  sensor.clear();
-  delay(900000);
 }
