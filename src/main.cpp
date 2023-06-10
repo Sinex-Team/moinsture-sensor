@@ -16,37 +16,38 @@ const char* passowrd = "";
 const String serverUrl = "https://backend-aquamole.azurewebsites.net/hygrometers";
 
 int sensorId;
-int sensorMoinsture;
+int humidity;
 
 void setup() {
   WiFi.begin(ssid, passowrd);
   http.addHeader("Content-Type", "application/json");
+  pinMode(relePin, OUTPUT);
 }
 
 void loop() {
-  if (WiFi.isConnected()) {
+if (WiFi.isConnected()){
     if (!sensorId) {
       http.begin("https://backend-aquamole.azurewebsites.net/hygrometers/id");
-      if (http.GET() == 200) {
+      if (http.POST("") == 200) {
         deserializeJson(dataJSON, http.getString());
         sensorId = dataJSON["id"];
         dataJSON.clear();
       }
     }
     
-    http.begin(serverUrl);
-    sensorMoinsture = map(analogRead(moinstureSensor), 1000, 3000, 100, 0);
-    if (sensorMoinsture < 60) {
-      digitalWrite(relePin, 1);
-    } else if(sensorMoinsture > 80) {
-      digitalWrite(relePin, 0);
+    http.begin("https://backend-aquamole.azurewebsites.net/hygrometers");
+    humidity = map(analogRead(moinstureSensor), 1000, 3000, 100, 0);
+    if (humidity < 60) {
+      digitalWrite(relePin, HIGH);
+    } else {
+      digitalWrite(relePin, LOW);
     }
     dataJSON["id"] = sensorId;
-    dataJSON["moinsture"] = sensorMoinsture;
+    dataJSON["humidity"] = humidity;
     serializeJson(dataJSON, sensor);
     dataJSON.clear();
     http.POST(sensor);
     sensor.clear();
-    delay(900000);
+    delay(900000); 
   }
 }
