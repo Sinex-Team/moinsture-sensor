@@ -12,14 +12,13 @@ const int moinstureSensor = 34;
 const int relePin = 23;
 
 const char* ssid = "";
-const char* passowrd = "";
-const String serverUrl = "https://backend-aquamole.azurewebsites.net/hygrometers";
+const char* password = "";
 
 int sensorId;
 int humidity;
 
 void setup() {
-  WiFi.begin(ssid, passowrd);
+  WiFi.begin(ssid, password);
   http.addHeader("Content-Type", "application/json");
   pinMode(relePin, OUTPUT);
 }
@@ -39,7 +38,7 @@ if (WiFi.isConnected()){
     humidity = map(analogRead(moinstureSensor), 1000, 3000, 100, 0);
     if (humidity < 60) {
       digitalWrite(relePin, HIGH);
-    } else {
+      delay(1500);
       digitalWrite(relePin, LOW);
     }
     dataJSON["id"] = sensorId;
